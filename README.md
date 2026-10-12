@@ -1,6 +1,6 @@
 # dotfiles
 
-My Claude Code setup: development rules, skills, agents and slash commands.
+My Claude Code setup: my global CLAUDE.md, skills, agents, slash commands and hooks.
 
 Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles). [SOURCE.md](SOURCE.md) records the exact commit and what was left out.
 
@@ -8,7 +8,9 @@ Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles
 
 | Path | What it is |
 |---|---|
-| `claude/.claude/CLAUDE.md` | citypaul's development rules, unedited |
+| `claude/.claude/CLAUDE.md` | My global rules, a copy of `~/.claude/CLAUDE.md` |
+| `claude/.claude/CLAUDE.citypaul.md` | citypaul's development rules, unedited, reference only |
+| `scripts/claude-md.js` | Keeps the repo copy and `~/.claude/CLAUDE.md` in step |
 | `claude/.claude/skills/` | 50 skills: testing, refactoring, debugging, planning, API and architecture design, React, XState, writing |
 | `claude/.claude/agents/` | 9 agents, such as `tdd-guardian`, `ts-enforcer`, `refactor-scan`, `adr` |
 | `claude/.claude/commands/` | `/plan`, `/continue`, `/setup` |
@@ -57,11 +59,34 @@ fs.writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
 
 Running it again does not add a second entry.
 
+### Global CLAUDE.md
+
+From the repo root:
+
+```bash
+cd ~/dotfiles
+node scripts/claude-md.js install
+```
+
+If a `~/.claude/CLAUDE.md` already exists and differs, it is backed up next to itself first, as `CLAUDE.md.bak-<date>`.
+
 Then restart Claude Code.
 
-## How it fits with my global CLAUDE.md
+## Keeping my global CLAUDE.md tracked
 
-Copying citypaul's `CLAUDE.md` over `~/.claude/CLAUDE.md` would replace my own rules, so I don't. My global file has a "Development" section instead. It contains:
+The live file is `~/.claude/CLAUDE.md`, and the repo keeps a copy at `claude/.claude/CLAUDE.md`. Symlinks are blocked on my Windows machine, so a small Node script copies between the two instead.
+
+| Command | What it does |
+|---|---|
+| `node scripts/claude-md.js status` | Says whether the two copies differ (exit 1 if they do) |
+| `node scripts/claude-md.js save` | Copies `~/.claude/CLAUDE.md` into the repo |
+| `node scripts/claude-md.js install` | Copies the repo file into `~/.claude`, with a backup first |
+
+After editing my rules, I run `save`, then commit. Line endings are ignored when comparing, because git may check the repo copy out with Windows line endings.
+
+## How it fits with citypaul's CLAUDE.md
+
+Copying citypaul's `CLAUDE.md` over `~/.claude/CLAUDE.md` would replace my own rules, so I don't. His file is kept as `CLAUDE.citypaul.md` for reference, and my global file has a "Development" section instead. It contains:
 
 - the core rules: test first, strict TypeScript, immutable data, small steps
 - a table of which skill to use for which job
@@ -77,8 +102,11 @@ Left out on purpose:
 
 ```bash
 git clone --depth 1 https://github.com/citypaul/.dotfiles.git /tmp/citypaul
-diff -r /tmp/citypaul/claude/.claude claude/.claude
+diff -r -x CLAUDE.md /tmp/citypaul/claude/.claude claude/.claude
+diff /tmp/citypaul/claude/.claude/CLAUDE.md claude/.claude/CLAUDE.citypaul.md
 ```
+
+The first diff skips `CLAUDE.md`, because that path now holds my own rules. The second compares his rules with the reference copy.
 
 Copy across what you want, then update the commit in [SOURCE.md](SOURCE.md).
 
