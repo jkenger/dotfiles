@@ -1,208 +1,252 @@
-# Development Guidelines for Claude
+# Global instructions
 
-> **About this file:** v3 architecture generation from the current 4.9.0 package. Core principles live here; detailed patterns load on demand via skills.
->
-> **Architecture:**
-> - **CLAUDE.md** (this file): Core philosophy + quick reference (~160 lines, always loaded)
-> - **Skills**: Detailed patterns loaded on-demand (specification, ubiquitous-language, planning, story-splitting, stack-pull-requests, acceptance-review, debugging, ci-debugging, tdd, testing, mutation-testing, test-design-reviewer, typescript-strict, functional, refactoring, reduce-system-complexity, expectations, front-end-testing, react-testing, react-performance, xstate, render-code-shape, hexagonal-architecture, domain-driven-design, event-sourcing, twelve-factor, api-design, secure-oauth-oidc, bff-design, bff-entry-points, cli-design, codebase-design, improve-codebase-architecture, structure-codebase, evaluate-existing-solutions, finding-seams, characterisation-tests, production-parity-skill-builder, storyboard, teach-me, diagrams, technical-writing, find-skills, find-gaps, double-check, graph-engineering, review)
-> - **External skills**: Loaded on-demand from community repos (impeccable + 17 steering commands from [pbakaus/impeccable](https://github.com/pbakaus/impeccable), web quality and clarity from [Addy Osmani](https://github.com/addyosmani), simple-english from [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish), Next.js and React skills from Vercel, grill-me and writing-for-agents from [mattpocock/skills](https://skills.sh/mattpocock/skills), skill-creator from [anthropics/skills](https://github.com/anthropics/skills), seo-audit from [coreyhaines31/marketingskills](https://skills.sh/coreyhaines31/marketingskills/seo-audit), skill-doctor from [warpdotdev/common-skills](https://www.warp.dev/skill-doctor))
-> - **Agents**: Specialized subprocesses for verification and analysis
->
-> **Previous versions:**
-> - v2.0.0: Modular with @docs/ imports (~3000+ lines always loaded)
-> - v1.0.0: Single monolithic file (1,818 lines)
+Voice rules are at the end of this file, under "How to write". They apply in every
+project, in chat replies as well as in anything written for people to read, and they
+outrank any tone or "Replies" instruction in a project's own CLAUDE.md. A project file
+decides technical conventions. It does not decide voice.
 
-## Core Philosophy
+## Visual design principles
 
-**TEST-DRIVEN DEVELOPMENT IS NON-NEGOTIABLE FOR NEW OR CHANGED BEHAVIOR.** Every production behavior change must be written in response to a failing behavior test. Pure behavior-preserving refactoring and mechanism reduction begin from passing preservation evidence and remain behaviorally green. Use mutation evidence where meaningful; for unreachable, configuration, contract, integration, or operational changes, record proportionate alternate evidence and `N/A` instead of fabricating RED or structural mutants.
+This list is the taste reference for any UI work, in any project. It is the source; the notes under it are how to apply it, not a replacement for it.
 
-I follow Test-Driven Development (TDD) with a strong emphasis on behavior-driven testing and functional programming principles. All work should be done in small, incremental changes that maintain a working state throughout development.
+1. Purple-to-blue gradient.
+2. Gradient hero text.
+3. Emojis in headings.
+4. Inter font everywhere.
+5. Colored border cards.
+6. Glassmorphism cards.
+7. Low-contrast dark mode.
+8. Three icon boxes in a row.
+9. Badge above the headline.
+10. Lucide icons everywhere.
+11. Untouched shadcn UI.
+12. Fade-in on scroll.
+13. Cursor-following beam.
+14. Buttons fade on hover.
+15. Inconsistent spacing.
+16. Em dashes everywhere.
+17. Generic buzzword copy.
+18. Serif italic accents.
+19. Space Grotesk + Instrument Serif.
+20. Grain over a gradient.
 
-For mutation-testing cadence, a **phase of work** means one PR review boundary. Normally that is one PR-sized, independently mergeable slice; in a cross-slice stack it is one whole-slice member, and in an intra-slice stack it is one focused dependent layer. It does not mean a multi-PR feature/stack as a whole or the numbered lifecycle phases in `README.md`.
+### Two of these are bugs, not taste
 
-## Quick Reference
+Fix these without discussion:
 
-**Key Principles:**
+- **Low-contrast dark mode (7).** Measure it, do not eyeball it. Body text needs 4.5:1 against its actual background. Check the dark register separately from the light one, and check muted text specifically, because a muted grey that passes on white routinely fails on a dark surface.
+- **Inconsistent spacing (15).** The same component at three different paddings, or radii spread across five steps with nothing deciding which, is a missing token rather than a style choice.
 
-- Write behavior tests first for new or changed behavior (TDD)
-- Test behavior, not implementation
-- No unexplained `any`; contain unavoidable interop and justify assertions
-- Prefer immutable values and pure logic; isolate necessary mutation and effects
-- Cohesive functions behind stable module contracts
-- TypeScript strict mode always
-- Reuse an existing production schema when it adds test evidence; do not
-  redefine the same contract
+The rest are preferences. Avoid them by default. Where a brand or design system genuinely requires one, that is allowed, but say so and record the reason rather than quietly breaking the rule. A real brand decision beats the list; drifting into one does not.
 
-**Preferred Tools:**
+Beyond the list itself: build project-specific type, spacing and surfaces instead of shipping a framework's defaults, choose layouts around the real content and tasks rather than repeating a stock marketing composition, use decoration and motion for a reason, and write concrete copy. Review the whole composition, not just the individual rules.
 
-- **Language**: TypeScript (strict mode)
-- **Testing**: Follow the repository harness; prefer real-browser evidence
-  when the claim depends on browser behaviour and the cost is justified
-- **State Management**: Prefer immutable patterns
+## Branches
 
-## Testing Principles
+Start every new feature or task on its own new branch, cut from the up-to-date base
+branch, before the first edit. Never commit new work straight onto master, main, or
+a branch left over from earlier work. Asked for on 1 Oct 2026.
 
-**Core principle**: Test behavior, not implementation. Cover changed and
-high-risk behavior proportionately; a coverage percentage is not proof.
+Name it in conventional form, the commit type then a short kebab-case description:
+`feat/quantity-movement`, `fix/track-screen-labels`, `docs/roadmap-sync`. When a
+session opens on an app-generated name such as `claude/<session-name>`, rename it
+with `git branch -m` before the first commit.
 
-**Quick reference:**
-- Write behavior tests first for new or changed behavior (TDD non-negotiable)
-- Test through the subject's public interface at the layer the claim names (an HTTP endpoint is the wrong interface for a browser claim)
-- Use factories for repeated or nested test data; isolated lifecycle hooks and
-  clear one-off values are valid
-- Tests must document expected business behavior
-- Organize tests around behavior and repository ownership, not a universal
-  file-count rule
+Before merging or committing in any checkout, read which branch it is on right then
+(`git branch --show-current`) rather than trusting what it was earlier in the
+session. Another session can switch the same folder in between, and a merge once
+landed on someone else's fresh branch instead of master because of that. To move
+master forward without touching a checkout, use `git fetch . <branch>:master`.
 
-For detailed testing patterns and examples, load the `testing` skill.
-For verifying test effectiveness through mutation analysis, load the `mutation-testing` skill at the end-of-phase PR-readiness gate; use its mutator rules earlier for cheap test-design guidance without running the automated harness.
+A new task gets a new branch even when the last one is still open. Fixes for review
+or CI on an open PR go on that PR's own branch; anything else is a new task. Asked
+for again on 3 Oct 2026.
 
-## TypeScript Guidelines
+### Clean up when a task is done
 
-**Core principle**: Strict mode always. Schema-first at trust boundaries, types for internal logic.
+A task is done when its PR is merged or closed, or the owner drops it. Clean up then,
+not before, in this order:
 
-**Quick reference:**
-- No unexplained `any`; use `unknown` at untrusted boundaries and contain
-  unavoidable interop
-- No type assertions without justification
-- Follow repository convention for `type`/`interface`, then language semantics
-- Define schemas at runtime trust boundaries and derive types from them
-- Use plain types, smart constructors, or domain values for trusted internal logic
+1. Read the current branch first, as above.
+2. Switch the checkout back to the base branch and pull it, so the next session starts
+   from the latest code instead of a stale feature branch.
+3. Delete the local branch with `git branch -d`, which refuses unmerged work. Delete
+   the remote branch too, unless GitHub already did on merge. Then `git fetch --prune`.
+4. Remove anything the task started: worktrees, dev or preview servers, background
+   jobs, and scratch or debug files inside the repo.
+5. Report what was removed, in one short list.
 
-For detailed TypeScript patterns and rationale, load the `typescript-strict` skill.
-For API and interface design patterns, load the `api-design` skill.
-For OAuth 2.0 or OpenID Connect design, implementation, review, testing, incident analysis, or migration, load the `secure-oauth-oidc` skill.
+Ask first before deleting a branch with unmerged commits, a branch or file the task
+didn't create, or anything belonging to a dropped task. Never clean up with
+`git reset --hard`, `git clean`, or a force delete (`-D`) unless the owner says so;
+other sessions may share the folder, and those commands destroy work silently.
+Asked for on 3 Oct 2026.
 
-## Code Style
+## Development
 
-**Core principle**: Prefer immutable data and pure logic where they make
-behavior easier to reason about; keep necessary effects explicit.
+Adapted from citypaul/.dotfiles on 12 Oct 2026. The skills it names live in
+`~/.claude/skills`. A project's own CLAUDE.md, tests and conventions win over this.
 
-**Quick reference:**
-- Prefer immutable values; contain mutation where a boundary, library, or
-  measured performance need requires it
-- Pure functions wherever possible
-- Use early returns or composition when they make branching clearer
-- Use comments for non-obvious why, constraints, and safety context
-- Use an options object when positional parameters are ambiguous or unstable
-- Choose array methods or loops by clarity, control flow, and measured needs
-- Compose small private functions behind cohesive, stable module contracts; do not equate one helper with one public module
+### Core rules
 
-For detailed patterns and examples, load the `functional` skill.
+- **Test first for behavior changes.** Write a failing behavior test, write the least
+  code that passes it, then tidy while it stays green. Pure refactors start from
+  passing tests instead of a fake failing one.
+- **Test behavior, not implementation.** Go through the public interface at the layer
+  the claim is about. Coverage numbers are not proof.
+- **TypeScript strict.** No unexplained `any`, `unknown` at untrusted boundaries, no
+  type assertion without a reason. Validate with a schema at trust boundaries and
+  derive the type from it.
+- **Prefer immutable data and pure functions.** Keep side effects at the edges and
+  make them obvious.
+- **Small steps.** Every increment leaves the code working.
+- **Plan-only means plan-only.** When asked for a plan or a document, write no code.
+- **Mutation testing once per PR**, at the end, not after every step.
 
-## Development Workflow
+### Which skill for which job
 
-**Core principle**: Use fast RED-GREEN-REFACTOR increments for changed behavior. Run mutation testing or review alternate evidence once at the end-of-phase PR-readiness gate, after implementation and refactoring are complete.
+| Job | Skill |
+|---|---|
+| Test-first workflow | `mattpocock-skills:tdd`, then `testing` |
+| Bug or runtime failure | `mattpocock-skills:diagnosing-bugs` |
+| CI failure | `ci-debugging` |
+| Module design and interfaces | `mattpocock-skills:codebase-design` |
+| Folder and package layout | `structure-codebase` |
+| Architecture audit of a repo | `improve-codebase-architecture` |
+| Refactor or simplify | `refactoring`, `reduce-system-complexity` |
+| Untested legacy code | `characterisation-tests`, `finding-seams` |
+| Types and schemas | `typescript-strict` |
+| Data transformations | `functional` |
+| UI and React tests | `front-end-testing`, `react-testing` |
+| React or Next.js speed | `react-performance` |
+| Async UI flows (loading, retry, submit) | `xstate` |
+| HTTP APIs | `api-design`, `bff-design`, `bff-entry-points` |
+| Login, OAuth, OIDC | `secure-oauth-oidc` |
+| CLIs | `cli-design` |
+| Fuzzy idea to acceptance criteria | `specification`, then `story-splitting` |
+| Poke holes in a plan or spec | `find-gaps` |
+| Implementation plan | `planning` (or `/plan`), `stack-pull-requests` |
+| Does the work meet the spec | `acceptance-review` |
+| Review a branch or PR | `panel-review`, `double-check` |
+| Library or build-it-ourselves choice | `evaluate-existing-solutions` |
+| Domain names and glossary | `ubiquitous-language` |
+| Where a learning should be written down | `expectations` |
 
-**Quick reference:**
-- RED: Write a failing behavior test before new or changed behavior
-- GREEN: Write MINIMUM code to pass test
-- REFACTOR OR REDUCE: Assess applicable improvements while ordinary behavior tests stay green
-- REPEAT: Continue the inner cycle without running the automated mutation harness after each increment, refactor, or commit
-- PRE-PR MUTATION GATE: When the phase is otherwise ready for a PR, run mutation testing once for the accumulated scope where meaningful; otherwise record `N/A` plus proportionate reachability, configuration, contract, integration, or operational evidence
-- KILL MUTANTS: During that gate, address valuable survivors and re-run focused/diff mutation checks as part of the same gate (ask the human when value is ambiguous)
-- **Wait for commit approval** before every commit
-- Each increment leaves codebase in working state
-For detailed TDD workflow, load the `tdd` skill.
-For a behavior-changing planned slice, load `tdd`, `testing`, and applicable refactoring guidance before code changes begin. Use the `mutation-testing` skill's mutator rules for cheap test-design guidance, but do not run its harness until the end-of-phase PR-readiness gate. For a pure behavior-preserving refactor/reduction, load only the applicable testing, refactoring, and reduction skills during implementation, then apply mutation testing or alternate evidence at the same PR gate; load `reduce-system-complexity` when net mechanism removal is claimed, and record why any other skill is `N/A`. Do not load the full RED workflow merely to assert implementation shape.
-For refactoring methodology, load the `refactoring` skill.
-For removing total branches, states, dependencies, layers, flags, retries, jobs, or operational moving parts from a selected existing path while conserving behavior, load the `reduce-system-complexity` skill. Pure reductions use the verified REFACTOR path, not a fabricated structural RED test.
-For fuzzy product/design decisions, load `grill-me` when installed; otherwise
-use the host's one-question mechanism or `specification` to pressure-test the
-decision tree before writing stories or plans.
-For turning fuzzy intent into shared understanding and acceptance criteria — agent-facilitated draft followed by accountable, risk-proportionate human review — load the `specification` skill.
-For naming domain concepts, glossary work, or any new/changed domain term — the five-step language protocol, never silent coinage — load the `ubiquitous-language` skill.
-For broad stories, epics, features, or backlog items, load `story-splitting` to create child stories before planning.
-For tightening an existing story, plan, acceptance criteria set, or mock spec, load `find-gaps` to write confirmed answers back into the artifact.
-For significant implementation work, load `planning` to turn one selected child story or narrow capability into the repository's declared planning workflow and location; use `plans/` only as the documented fallback.
-When one planned vertical slice may be too large for review, or later slices should start on the same evolving baseline before lower PRs merge, load `stack-pull-requests` with `planning` to choose independent PRs or an explicit hard-/flow-lineage stack without turning technical layers into stories or slices.
-For CI failure diagnosis, load the `ci-debugging` skill.
-For local or runtime failure diagnosis, load `debugging` to preserve evidence, localize one causal hypothesis at a time, and fix the earliest shared owning boundary when a fix is requested.
-For a read-only decision on whether finished implementation satisfies an authoritative requirement, load `acceptance-review` and report every criterion plus its evidence and exact verdict.
-For hexagonal architecture projects, load the `hexagonal-architecture` skill.
-For Domain-Driven Design projects, load the `domain-driven-design` skill.
-For event-sourced systems or bounded contexts (events as the source of truth, the Decider write model, event stores, projections and read models, event versioning, snapshots), load the `event-sourcing` skill.
-For 12-factor service projects, load the `twelve-factor` skill.
-For production observability (wide events, OpenTelemetry, SLOs/alerting, telemetry testing), load the `observability` skill.
-For CLI tool design (stream separation, format flags, exit codes, composability), load the `cli-design` skill.
-For the backend-for-frontend pattern itself — whether to adopt a BFF, how many, what each may own, upstream aggregation and partial failure, and mediating user identity toward upstream services — load the `bff-design` skill.
-For browser-facing BFF or backend HTTP entry points — public/protected access classification, authentication middleware, session cookies, CSRF/Origin policy, protected SSE/WebSocket registration, and endpoint-protection enforcement — load the `bff-entry-points` skill.
-For designing a selected module's coherent responsibility, full caller-facing contract, information hiding, depth, leverage, and justified seams, load the `codebase-design` skill.
-For a read-only render of how code composes — entry points, module boundaries, the types crossing them, signatures, and a cited call graph per wiring, with `[NEW]` marking work not yet built — load the `render-code-shape` skill. Use it to understand an unfamiliar path or to pseudocode a change before implementing it; it never authorizes the edit.
-For finding and ranking evidence-backed architecture improvements across a repository or subsystem — with a self-contained visual HTML report — load the `improve-codebase-architecture` skill.
-For designing or auditing source trees, frontend route/feature/state/design-system ownership, package boundaries, visible hexagonal layouts, feature folders, BFF route organization, composition roots, or folder migrations, load the `structure-codebase` skill.
-For front-end flow logic, load the `xstate` skill — and load it *before* reaching for `useState`, not only when a file already imports xstate. Two tests decide ownership, never how the value renders: an external answer changed it (request, response, error, retry, timeout, cancellation, stream message, anything sent to a BFF), or the interaction has an interruptible middle (a drag holding pointer capture, a closing animation, a gesture binding document listeners). A disabled button or spinner is the presentation *of* temporal state. State stays in React only when both tests come back empty — one event sets it completely, nothing to interrupt or dispose. A `submitting`/`isLoading` flag, a promise chain setting state in sequence, a double-submit guard, an error cleared before a retry, a `useEffect` needing an ignore flag, or a timer something must clear is a hand-rolled statechart; if an actor already owns that lifecycle, the state belongs in it. Check the repository's own conventions for which layer owns machines before creating one, and ask rather than guess on a genuine tie.
-For React or Next.js performance work, load the `react-performance` skill: baseline the symptom, attribute the cost with evidence, apply one rule at a time from the pinned `vercel-react-best-practices` catalogue, then re-measure. Behavior tests stay unchanged and green; immutability and typing rules are not traded for speed, and unmeasured optimizations are reverted rather than kept.
-Before introducing a material generic mechanism or durable new dependency, load `evaluate-existing-solutions` proportionately: run a lightweight local/platform preflight before bespoke generic machinery; run due diligence without reopening alternatives for a named but newly introduced dependency; use the full comparison for consequential unresolved choices. Do not turn this into a search tax for domain-specific logic, small glue, routine use of an already-adopted tool, or ordinary fixes and refactors.
-For environment parity issues (works locally but not in production/staging, config or auth drift), load the `production-parity-skill-builder` skill.
-For making untestable code testable, load the `finding-seams` skill.
-For documenting existing behavior before changes, load the `characterisation-tests` skill.
-For multi-surface design audits before code (embed every mock in a scope on one reviewable page with flow diagram + gap cards + per-mock audit checklists), load the `storyboard` skill.
-For structured learning of any topic (interactive tutoring, courses, quizzes, reviewable HTML lessons), use `/teach-me [topic]`.
-For developer-facing prose — READMEs, guides, tutorials, reference docs, proposals, release notes — load the `technical-writing` skill (reader-first structure, falsifiable claims, agent-readable reference shape).
-For reader-facing prose that needs sentence-level co-writing, rewriting, review, or diagnostics because it feels generic, hollow, or AI-shaped, load `clarity` when installed. `technical-writing` owns the document's reader job, structure, and verifiable claims; `clarity` owns substance, voice, and sentences.
-For technical prose requested in plain English, layman's terms, ASD-STE100, or a form suitable for non-native readers or translation, load `simple-english` when installed. Use its Plain mode by default and its Strict mode only when the user names STE or compliance; leave marketing and brand voice to `clarity`.
-For documents an *agent* consumes rather than a human — a SKILL.md, `CLAUDE.md`/`AGENTS.md`, or a doc reached by a pointer — load `writing-for-agents` when installed: context pointers and trigger wording, the context/cognitive load split, the information hierarchy and progressive disclosure, and completion criteria that resist premature completion. Route by audience, not by file type: `technical-writing` owns human-facing prose, `writing-for-agents` owns agent-facing instruction.
-For authoring, restructuring, evaluating, or benchmarking a skill itself — drafting from scratch, running evals over test prompts, or tuning a description for trigger accuracy — load `skill-creator` when installed. Use `writing-for-agents` for how the words should read and `skill-creator` for the authoring and measurement loop around them.
-For grading installed skills against recent local agent conversations, load `skill-doctor` when installed. It owns retrospective scoring and evidence-backed improvement proposals; use `skill-creator` for authoring and controlled prompt evals.
-For discovering and installing agent skills from the open ecosystem (`npx skills`), load the `find-skills` skill.
-For adversarial review of plans, acceptance criteria, stories, or design mocks — one question at a time, turning each answer into a new AC / plan paragraph / mock-state spec written back to the source of truth — load the `find-gaps` skill.
-For relentless decision-tree interrogation before story splitting, planning, or implementation, load `grill-me` when installed; otherwise use `specification` or the host's one-question mechanism.
-For a rigorous second opinion on finished work, load `double-check`. It selects an available reviewer dynamically, prefers a different provider when possible, labels a same-provider fresh-context fallback honestly, and bounds unresolved disagreement rather than requiring artificial consensus.
-For composing several installed skills into one orchestrated multi-agent run — an agent graph where each sub-agent node loads exactly one skill, with fan-out, adversarial verification, and synthesis stages — load the `graph-engineering` skill.
-For reviewing any change boundary — uncommitted work-in-progress, a branch, a stacked layer, a diff, or a pull request — through composable skill lenses (`/panel-review`, one sub-agent per lens, verified findings, one ranked report), or for the PR-readiness evidence gate before creating a PR, load the `panel-review` skill.
+Some copied skills still say `tdd`, `codebase-design` or `debugging`. Read those as
+`mattpocock-skills:tdd`, `mattpocock-skills:codebase-design` and
+`mattpocock-skills:diagnosing-bugs`. Where one says `grill-me`, use
+`mattpocock-skills:grilling`.
 
-**Project onboarding:** Run `/setup` only when the user asks to onboard or
-configure a project and authorizes the generated project files. Ordinary
-read-only or narrowly scoped work does not trigger setup.
+## How to write
 
-**Project-level hooks:** When the repository supports hooks and the user authorizes project configuration, consider a PostToolUse typecheck/format hook using the repository's existing toolchain. `/setup` may generate one only within that explicit onboarding scope; the curl installer does not install settings.json.
+This is the last section on purpose. It is the single source for voice, it applies in
+every project, and it beats a project CLAUDE.md that says only "be concise". Nothing
+below needs restating in a project file or in a memory. If a project already carries a
+copy, the copy is redundant and should go rather than be kept in sync.
 
-## Output Guardrails
+### Plain by default, technical where it is the exact thing
 
-- **Honor the requested artifact boundary** — Persist a plan or document only
-  when the user asks for a file or the repository declares that durable owner.
-  Otherwise answer in chat without creating a new source of truth.
-- **Plan-only mode** — When asked for a plan, design, or document only, produce ONLY that artifact. Do not write production code, test code, or make any implementation changes unless explicitly asked.
-- **Incremental output** — When exploring a codebase, produce a first draft of output within 3-4 tool calls. Refine iteratively rather than front-loading all exploration before producing anything.
+Plain language in chat replies, and in anything written for people to read: specs,
+PR descriptions, commit messages, notes, UI copy.
 
-## Working with Claude
+Keep a technical term only where it is the actual thing being referred to and the plain
+word would be wrong or ambiguous. That covers names and identifiers (ticket numbers,
+branch and PR names, file paths, library and tool names, database features) and anything
+written for developers, where precise model and field names matter. The explanation
+wrapped around those terms still goes plain.
 
-**Core principle**: Think deeply, follow TDD strictly, capture learnings while context is fresh.
+The short version John agreed to: plain for people-facing, technical for developer-facing
+and for exact names.
 
-**Quick reference:**
-- ALWAYS FOLLOW TDD for behavior change; keep pure refactors/reductions behaviorally green from passing, proportionate preservation evidence
-- Assess refactoring after every green (but only if adds value)
-- Ask "What do I wish I'd known at the start?" after significant changes
-- Route durable, non-obvious learnings through `expectations` to their actual
-  owner: source/tests, glossary, accepted decision mechanism, maintained docs,
-  active plan, or repository working policy
-- Update CLAUDE.md only for local working policy it is declared to own, and only
-  when the request or repository workflow authorizes that write
+### Skip business and strategy jargon
 
-For detailed TDD workflow, load the `tdd` skill.
-For refactoring methodology, load the `refactoring` skill.
-For detailed guidance on expectations and documentation, load the `expectations` skill.
+| Instead of | Write |
+|---|---|
+| the wedge | the one feature that wins the first customers |
+| the moat | something competitors can't easily copy |
+| table stakes | everyone will expect this |
+| commodity trap | a copy of something already free |
+| value proposition | why someone would pay for it |
+| leverage, unlock, north star | say what actually happens |
 
-## Browser Automation
+The test: if a smart person outside the project would need a translation, rewrite it.
+Jargon makes simple ideas sound complicated and hides whether the thinking is any good.
 
-Prefer `agent-browser` for web automation. If it is not installed, fall back to other available tools (e.g. `WebFetch`, `curl`, or MCP browser tools). Always try `agent-browser` first.
+The same applies to product vocabulary. Write the way the person using the screen would
+say it, not the way the system names it internally: "how often to check in" rather than
+"cadence", "who referred them" rather than "attribution". Where a project has its own
+glossary, that file decides the wording and this rule just says to go and read it.
 
-`agent-browser` core workflow:
-1. `agent-browser open <url>` - Navigate to page
-2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
-3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
-4. Re-snapshot after page changes
+### No em dashes
 
-Run `agent-browser --help` for all commands.
+None, anywhere. Not in chat replies, not in app and UI copy, not in commit messages,
+docs or notes. Use a period, comma, colon, semicolon, or parentheses instead.
 
-## Resources and References
+En dashes in numeric ranges (2018–2025) are fine, they are ranges. Arrow notation like
+"Settings → Users → Roles" is fine.
 
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
-- [Testing Library Principles](https://testing-library.com/docs/guiding-principles)
-- [Kent C. Dodds Testing JavaScript](https://testingjavascript.com/)
-- [Functional Programming in TypeScript](https://gcanti.github.io/fp-ts/)
+He asked for this on 13 Aug 2026 for app copy, then made it general on 14 Aug. Em
+dash-heavy sentences read as an AI writing tell, which is also item 16 in the visual
+design list above.
 
-## Summary
+### Shape it for a fast scan
 
-The key is to write clean, testable, functional code that evolves through small, safe increments. Drive production-behavior changes with a test that describes the desired behavior; use claim-appropriate evidence for documentation, configuration, dependency, generated, CI, and operational changes. The implementation should be the simplest thing that makes the test or other governing check pass. When in doubt, favor simplicity and readability over cleverness.
+Asked for on 17 Sep 2026: product language and ADHD style, in everything, chat
+replies included.
+
+Lead with the answer. The first line is the takeaway, never a preamble, never a
+recap of the question. He should be able to stop reading after the first block and
+still be right about what happened.
+
+Then keep the shape: one idea per line, blocks of one to three sentences with a
+blank line between them, bullets wherever there are two or more parallel things,
+and bold on the few words that carry the point rather than on a whole sentence.
+Numbers, names, file paths and the next step each get their own line instead of
+being buried mid-sentence. Cut the setup entirely, no "let me explain", no "as
+mentioned above", no restating what he just asked.
+
+Product language means naming what a person can or cannot do, not what the code
+returns. "She can see close rate per partner but not how much money they brought
+in", not "the query exposes closeRate but no volume aggregate". Exact identifiers
+still survive where they are the thing itself: ticket numbers, file paths, field
+names in developer-facing work.
+
+This shapes a long answer, it does not shorten one. A depth request still gets
+every decision, number and risk; it gets them as headings he can jump between with
+short blocks underneath, rather than as a wall.
+
+### App language on screens
+
+Asked for on 3 Oct 2026, after a Ken OS copy audit read as "a mix of marketing and an
+agent talking to me". The references are Things for labels and Linear for empty
+states and settings.
+
+The app is the frame, and the frame shows names, actions and states, not sentences.
+Full sentences belong only in content: a lesson, an agent's own chat or answer,
+feedback on something the person wrote. Personality and welcomes live there too, the
+way Things writes its tutorial inside to-dos rather than around them.
+
+- **Titles:** one noun or short phrase. No period, no tagline, no small label above
+  that restates it. "Today", "Terms", "Skills".
+- **Buttons:** a verb and an object. "Run tests", "Add skill", "Start baseline".
+- **States:** a word, a count or a date. "Not started", "3 of 8", "Due Oct 5".
+- **Field helpers:** one line, no period. "Used for date pickers", not two sentences
+  about why.
+- **Empty states:** a noun, one or two lines on what the thing is or how to add one,
+  one action. This is where a feature explains itself, and only before there is data.
+- **Longer explanation** goes behind a "How this works" toggle or into docs.
+- **Errors:** one line, what failed and then what to do.
+- **No selling:** the screen never describes itself ("Design, made repeatable").
+- **No narrating:** the app never talks like an agent ("Ready when you are", "Hi",
+  reassurance, explaining how the system works inline).
+
+A public marketing page is the one place a tagline belongs. A screen behind sign-in is
+not a marketing page. Where a project has a word list, it decides the names; these
+rules decide the shape.
+
+### Before sending
+
+Reread an explanation as if for a smart person outside the domain, and lead with the
+one-line takeaway. On 14 Aug 2026 an explanation built on "attribution", "canonical",
+"sources of truth" and "structural mismatch" was too complicated to follow. The
+retelling that landed was a three-row table and one sentence.

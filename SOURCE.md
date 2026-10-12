@@ -8,7 +8,7 @@ License: MIT, see `LICENSE`. Some skills carry their own `LICENSE` or `NOTICE`; 
 
 ## Kept
 
-- `claude/.claude/CLAUDE.md`: development guidelines
+- `claude/.claude/CLAUDE.citypaul.md`: development guidelines, renamed from `CLAUDE.md` so that path can hold my own global rules
 - `claude/.claude/skills/`: 50 skills
 - `claude/.claude/agents/`: 9 agents plus their README
 - `claude/.claude/commands/`: `/continue`, `/plan`, `/setup`
