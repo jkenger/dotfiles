@@ -9,8 +9,10 @@ Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles
 | Path | What it is |
 |---|---|
 | `claude/.claude/CLAUDE.md` | My global rules, a copy of `~/.claude/CLAUDE.md` |
+| `claude/.claude/design-principles.md` | Visual design taste reference, linked from `CLAUDE.md` with `@~/.claude/design-principles.md` |
+| `claude/.claude/how-to-write.md` | Voice and writing rules, linked from `CLAUDE.md` with `@~/.claude/how-to-write.md` |
 | `claude/.claude/CLAUDE.citypaul.md` | citypaul's development rules, unedited, reference only |
-| `scripts/claude-md.js` | Keeps the repo copy and `~/.claude/CLAUDE.md` in step |
+| `scripts/claude-md.js` | Keeps the repo copies and the live `~/.claude` files in step |
 | `claude/.claude/skills/` | 50 skills: testing, refactoring, debugging, planning, API and architecture design, React, XState, writing |
 | `claude/.claude/agents/` | 9 agents, such as `tdd-guardian`, `ts-enforcer`, `refactor-scan`, `adr` |
 | `claude/.claude/commands/` | `/plan`, `/continue`, `/setup` |
@@ -68,19 +70,19 @@ cd ~/dotfiles
 node scripts/claude-md.js install
 ```
 
-If a `~/.claude/CLAUDE.md` already exists and differs, it is backed up next to itself first, as `CLAUDE.md.bak-<date>`.
+If a live file already exists and differs, it is backed up next to itself first, as `<file>.bak-<date>`.
 
 Then restart Claude Code.
 
 ## Keeping my global CLAUDE.md tracked
 
-The live file is `~/.claude/CLAUDE.md`, and the repo keeps a copy at `claude/.claude/CLAUDE.md`. Symlinks are blocked on my Windows machine, so a small Node script copies between the two instead.
+The live files are `~/.claude/CLAUDE.md`, `~/.claude/design-principles.md`, and `~/.claude/how-to-write.md`, and the repo keeps matching copies under `claude/.claude/`. Symlinks are blocked on my Windows machine, so a small Node script copies between the two instead.
 
 | Command | What it does |
 |---|---|
-| `node scripts/claude-md.js status` | Says whether the two copies differ (exit 1 if they do) |
-| `node scripts/claude-md.js save` | Copies `~/.claude/CLAUDE.md` into the repo |
-| `node scripts/claude-md.js install` | Copies the repo file into `~/.claude`, with a backup first |
+| `node scripts/claude-md.js status` | Says whether any copies differ (exit 1 if they do) |
+| `node scripts/claude-md.js save` | Copies the live files into the repo |
+| `node scripts/claude-md.js install` | Copies the repo files into `~/.claude`, with a backup first |
 
 After editing my rules, I run `save`, then commit. Line endings are ignored when comparing, because git may check the repo copy out with Windows line endings.
 
