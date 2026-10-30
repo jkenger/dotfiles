@@ -10,6 +10,7 @@ Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles
 |---|---|
 | `claude/.claude/CLAUDE.md` | My global rules, a copy of `~/.claude/CLAUDE.md` |
 | `claude/.claude/design-principles.md` | Visual design taste reference, linked from `CLAUDE.md` with `@~/.claude/design-principles.md` |
+| `claude/.claude/default-visual-system.md` | Default color/type/layout/component/motion system, linked from `design-principles.md` with `@~/.claude/default-visual-system.md` |
 | `claude/.claude/how-to-write.md` | Voice and writing rules, linked from `CLAUDE.md` with `@~/.claude/how-to-write.md` |
 | `claude/.claude/CLAUDE.citypaul.md` | citypaul's development rules, unedited, reference only |
 | `scripts/claude-md.js` | Keeps the repo copies and the live `~/.claude` files in step |
@@ -76,7 +77,7 @@ Then restart Claude Code.
 
 ## Keeping my global CLAUDE.md tracked
 
-The live files are `~/.claude/CLAUDE.md`, `~/.claude/design-principles.md`, and `~/.claude/how-to-write.md`, and the repo keeps matching copies under `claude/.claude/`. Symlinks are blocked on my Windows machine, so a small Node script copies between the two instead.
+The live files are `~/.claude/CLAUDE.md`, `~/.claude/design-principles.md`, `~/.claude/default-visual-system.md`, and `~/.claude/how-to-write.md`, and the repo keeps matching copies under `claude/.claude/`. Symlinks are blocked on my Windows machine, so a small Node script copies between the two instead.
 
 | Command | What it does |
 |---|---|

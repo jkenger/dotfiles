@@ -26,9 +26,36 @@ notes under it are how to apply it, not a replacement for it.
 
 Fix these without discussion:
 
-- **Low-contrast dark mode (7).** Measure it, do not eyeball it. Body text needs 4.5:1 against its actual background. Check the dark register separately from the light one, and check muted text specifically, because a muted grey that passes on white routinely fails on a dark surface.
-- **Inconsistent spacing (15).** The same component at three different paddings, or radii spread across five steps with nothing deciding which, is a missing token rather than a style choice.
+- **Low-contrast dark mode (7).**
+  - Measure it, do not eyeball it.
+  - Body text needs 4.5:1 against its actual background.
+  - Check the dark register separately from the light one.
+  - Check muted text specifically: a muted grey that passes on white routinely
+    fails on a dark surface.
+- **Inconsistent spacing (15).** The same component at three different paddings,
+  or radii spread across five steps with nothing deciding which, is a missing
+  token rather than a style choice.
 
-The rest are preferences. Avoid them by default. Where a brand or design system genuinely requires one, that is allowed, but say so and record the reason rather than quietly breaking the rule. A real brand decision beats the list; drifting into one does not.
+The rest are preferences:
 
-Beyond the list itself: build project-specific type, spacing and surfaces instead of shipping a framework's defaults, choose layouts around the real content and tasks rather than repeating a stock marketing composition, use decoration and motion for a reason, and write concrete copy. Review the whole composition, not just the individual rules.
+- Avoid them by default.
+- A brand or design system can require one, but say so and record the reason
+  rather than quietly breaking the rule. A real brand decision beats the list;
+  drifting into one does not.
+
+Beyond the list itself:
+
+- Build project-specific type, spacing, and surfaces instead of shipping a
+  framework's defaults.
+- Choose layouts around the real content and tasks, not a stock marketing
+  composition.
+- Use decoration and motion for a reason.
+- Write concrete copy.
+- Review the whole composition, not just the individual rules.
+
+## Default visual system
+
+When a project has no color, type, spacing, or component system of its own
+yet, start here instead of improvising one font or palette at a time:
+
+@~/.claude/default-visual-system.md
