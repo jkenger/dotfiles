@@ -147,6 +147,38 @@ Some copied skills still say `tdd`, `codebase-design` or `debugging`. Read those
 `mattpocock-skills:diagnosing-bugs`. Where one says `grill-me`, use
 `mattpocock-skills:grilling`.
 
+### Feature lifecycle chain
+
+When a new feature or module starts as an idea with no acceptance criteria yet,
+during discovery, ideation, or a "let's build X" conversation, suggest starting
+this chain instead of going straight to code. Don't enforce it for a bug fix, a
+tweak, or a one-line request; those can skip straight to `mattpocock-skills:tdd`.
+
+`/setup` scaffolds the `docs/` folders this chain reads and writes, for a project
+that opts into it.
+
+1. **Specification** — `specification`. Writes acceptance criteria to
+   `docs/specifications/<feature>/specification.md`.
+2. **Split, only if the map comes back too big** — `story-splitting` turns an
+   epic-sized spec into child stories; each then re-enters this chain on its own.
+3. **Technical design** — `mattpocock-skills:codebase-design` for the module
+   contract; `adr` for any decision with real alternatives. Writes to
+   `docs/specifications/<feature>/technical-design.md` and
+   `docs/architecture/decisions/`.
+4. **Plan the slices** — `/plan` (`planning`). Writes to
+   `docs/specifications/<feature>/implementation-plan.md`. Test design isn't a
+   separate stage: each slice's failing test comes immediately before its code,
+   inside the RED-GREEN-REFACTOR cycle `planning` already runs.
+5. **Implement** — `mattpocock-skills:tdd`, `testing`, `functional`,
+   `typescript-strict`, one slice at a time.
+6. **Verify** — `tdd-guardian` for process, `mutation-testing` at end of phase,
+   `ts-enforcer` for types.
+7. **Review and deliver** — `panel-review` or `double-check`;
+   `stack-pull-requests` if a slice needs review layers. `progress-guardian`
+   tracks every gate above and asks for commit approval.
+8. **Learn** — `learn` routes durable facts through `expectations`; `adr` for
+   decisions; `docs-guardian` for maintained docs.
+
 ## How to write
 
 This is the last section on purpose, and it outranks a project CLAUDE.md that says
