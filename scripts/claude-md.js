@@ -18,7 +18,7 @@ const path = require("path");
 const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude");
 const REPO_DIR = path.join(__dirname, "..", "claude", ".claude");
 
-const FILES = ["CLAUDE.md", "design-principles.md", "how-to-write.md", "default-visual-system.md"];
+const FILES = ["CLAUDE.md", "PRODUCT.md", "DESIGN.md", "how-to-write.md", "default-visual-system.md"];
 
 const toLf = (text) => text.replace(/\r\n/g, "\n");
 
