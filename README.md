@@ -59,6 +59,17 @@ fs.writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
 
 Running it again does not add a second entry.
 
+### Ponytail plugin
+
+`settings.json` lists `ponytail@ponytail` under `enabledPlugins`: [Ponytail](https://github.com/DietrichGebert/ponytail), a "lazy senior dev" mode that pushes for the smallest change that fully solves the task and names what it skipped. Unlike the `claude-code-plugins` entries, its marketplace is not built in, so it needs registering once before Claude Code can resolve it:
+
+```
+/plugin marketplace add DietrichGebert/ponytail
+/plugin install ponytail@ponytail
+```
+
+Send those as two separate prompts in Claude Code. Switch modes any time with `/ponytail lite`, `/ponytail full` (default), `/ponytail ultra`, or turn it off with `/ponytail off`.
+
 ### Global CLAUDE.md
 
 From the repo root:
