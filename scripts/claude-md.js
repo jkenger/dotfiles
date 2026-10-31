@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Keeps the repo copy of my global CLAUDE.md in step with ~/.claude/CLAUDE.md.
+// Keeps the repo copies of my global Claude config files in step with ~/.claude/.
 // No dependencies. Symlinks are blocked on my Windows machine, so this copies.
 //
-//   node scripts/claude-md.js status    say whether the two copies differ
-//   node scripts/claude-md.js save      copy ~/.claude/CLAUDE.md into the repo
-//   node scripts/claude-md.js install   copy the repo file into ~/.claude (backup first)
+//   node scripts/claude-md.js status    say whether any copies differ
+//   node scripts/claude-md.js save      copy the live files into the repo
+//   node scripts/claude-md.js install   copy the repo files into ~/.claude (backup first)
 //
 // Line endings are ignored when comparing, because git may check the repo
 // copy out with CRLF. The live file is always written with LF.
@@ -15,11 +15,10 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const REPO_FILE = path.join(__dirname, "..", "claude", ".claude", "CLAUDE.md");
-const LIVE_FILE = path.join(
-  process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude"),
-  "CLAUDE.md",
-);
+const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude");
+const REPO_DIR = path.join(__dirname, "..", "claude", ".claude");
+
+const FILES = ["CLAUDE.md", "design-principles.md", "how-to-write.md", "default-visual-system.md"];
 
 const toLf = (text) => text.replace(/\r\n/g, "\n");
 
@@ -32,46 +31,64 @@ function timestamp() {
 }
 
 function status() {
-  const live = read(LIVE_FILE);
-  const repo = read(REPO_FILE);
-  if (live === null) return fail(`No live file at ${LIVE_FILE}`);
-  if (repo === null) return fail(`No repo file at ${REPO_FILE}. Run save first`);
-  if (live === repo) {
-    console.log("Same");
-    return 0;
+  let anyDifferent = false;
+  for (const name of FILES) {
+    const liveFile = path.join(CLAUDE_DIR, name);
+    const repoFile = path.join(REPO_DIR, name);
+    const live = read(liveFile);
+    const repo = read(repoFile);
+    if (live === null) return fail(`No live file at ${liveFile}`);
+    if (repo === null) return fail(`No repo file at ${repoFile}. Run save first`);
+    if (live === repo) {
+      console.log(`Same: ${name}`);
+    } else {
+      console.log(`Different: ${name}`);
+      anyDifferent = true;
+    }
   }
-  console.log("Different. Run save to keep your live edits, or install to restore the repo version");
-  return 1;
+  if (anyDifferent) {
+    console.log("Run save to keep your live edits, or install to restore the repo versions");
+  }
+  return anyDifferent ? 1 : 0;
 }
 
 function save() {
-  const live = read(LIVE_FILE);
-  if (live === null) return fail(`No live file at ${LIVE_FILE}`);
-  if (live === read(REPO_FILE)) {
-    console.log("Already saved");
-    return 0;
+  for (const name of FILES) {
+    const liveFile = path.join(CLAUDE_DIR, name);
+    const repoFile = path.join(REPO_DIR, name);
+    const live = read(liveFile);
+    if (live === null) return fail(`No live file at ${liveFile}`);
+    if (live === read(repoFile)) {
+      console.log(`Already saved: ${name}`);
+      continue;
+    }
+    fs.writeFileSync(repoFile, live);
+    console.log(`Saved ${name} to ${path.relative(process.cwd(), repoFile)}`);
   }
-  fs.writeFileSync(REPO_FILE, live);
-  console.log(`Saved to ${path.relative(process.cwd(), REPO_FILE)}. Commit it to track the change`);
+  console.log("Commit the repo changes to track them");
   return 0;
 }
 
 function install() {
-  const repo = read(REPO_FILE);
-  if (repo === null) return fail(`No repo file at ${REPO_FILE}`);
-  const live = read(LIVE_FILE);
-  if (live === repo) {
-    console.log("Already installed");
-    return 0;
+  for (const name of FILES) {
+    const liveFile = path.join(CLAUDE_DIR, name);
+    const repoFile = path.join(REPO_DIR, name);
+    const repo = read(repoFile);
+    if (repo === null) return fail(`No repo file at ${repoFile}`);
+    const live = read(liveFile);
+    if (live === repo) {
+      console.log(`Already installed: ${name}`);
+      continue;
+    }
+    if (live !== null) {
+      const backup = `${liveFile}.bak-${timestamp()}`;
+      fs.copyFileSync(liveFile, backup);
+      console.log(`Backed up the old ${name} to ${backup}`);
+    }
+    fs.mkdirSync(path.dirname(liveFile), { recursive: true });
+    fs.writeFileSync(liveFile, repo);
+    console.log(`Installed ${name} to ${liveFile}`);
   }
-  if (live !== null) {
-    const backup = `${LIVE_FILE}.bak-${timestamp()}`;
-    fs.copyFileSync(LIVE_FILE, backup);
-    console.log(`Backed up the old file to ${backup}`);
-  }
-  fs.mkdirSync(path.dirname(LIVE_FILE), { recursive: true });
-  fs.writeFileSync(LIVE_FILE, repo);
-  console.log(`Installed to ${LIVE_FILE}`);
   return 0;
 }
 
