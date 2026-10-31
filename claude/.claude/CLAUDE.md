@@ -14,9 +14,13 @@ Changing it needs a direct ask, not an assumption.
 - **UI:** React
 - **Language:** TypeScript, strict mode
 
+## Product
+
+@~/.claude/PRODUCT.md
+
 ## Visual design principles
 
-@~/.claude/design-principles.md
+@~/.claude/DESIGN.md
 
 ## Git & version control
 
