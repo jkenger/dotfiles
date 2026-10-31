@@ -33,6 +33,7 @@ Set up this project for Claude Code using the global framework. Analyze the proj
 5. **Check for DDD**: look for glossary files, domain directories, bounded context structure
 6. **Check for hexagonal architecture**: look for ports/, adapters/, domain/ directory structure
 7. **Check for 12-factor patterns**: look for Dockerfile, docker-compose.yml, Procfile, .env.example, process.env usage, PORT binding, Kubernetes manifests (k8s/, deployment.yaml)
+8. **Detect monorepo workspaces**: look for `workspaces` in package.json, `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, or multiple `apps/`/`packages/` directories. List each workspace found, with its own language/framework/test runner where it differs from the root.
 
 ## Generation Phase
 
@@ -44,7 +45,7 @@ Include sections based on what was detected:
 - **Project commands**: exact build, test, lint, typecheck, dev commands from package.json/Makefile
 - **Tech stack**: framework, language version, key dependencies
 - **TypeScript config**: note strict mode settings, especially `noUncheckedIndexedAccess` if enabled
-- **Monorepo structure**: if applicable, map workspaces and their purposes
+- **Monorepo structure**: if applicable, map workspaces and their purposes, and list which workspaces got their own `CLAUDE.md` from step 2
 - **CI pipeline**: CI system, pipeline steps, known environment differences from local
 - **DDD glossary location**: if DDD detected, point to glossary file
 - **12-factor services**: if 12-factor patterns detected, add `For 12-factor service patterns, load the \`twelve-factor\` skill.` and note the `twelve-factor-audit` agent is available for compliance audits
@@ -52,7 +53,28 @@ Include sections based on what was detected:
 
 Keep it concise and actionable — this replaces the need to run `/init`.
 
-### 2. Project hooks (`.claude/settings.json`)
+### 2. Per-workspace CLAUDE.md (monorepo only)
+
+Only when Analysis step 8 found more than one workspace. Claude Code loads the
+root `CLAUDE.md` plus the nearest one to whatever file it's editing, so these
+compose automatically; never duplicate root content into a workspace file.
+
+Ask which workspaces need their own `CLAUDE.md` — present the detected list
+and let the user pick. A workspace needs one only when it has commands,
+conventions, or boundaries that differ from the root (a different test
+runner, a pattern that applies to that app only, like Server Components in
+the web app but not a CLI package). Skip workspaces with nothing to add.
+
+For each selected workspace, create `<workspace>/CLAUDE.md` holding only its
+delta:
+- Its own build/test/lint/typecheck commands, if different from root
+- Patterns specific to that workspace
+- Nothing already true repo-wide — that stays in the root file only
+
+List the created files under the root `CLAUDE.md`'s "Monorepo structure"
+section so the mapping is visible from one place.
+
+### 3. Project hooks (`.claude/settings.json`)
 
 Generate a PostToolUse hook for typecheck after Write/Edit on .ts/.tsx files:
 ```json
@@ -75,7 +97,7 @@ Generate a PostToolUse hook for typecheck after Write/Edit on .ts/.tsx files:
 
 Use the actual typecheck command detected from the project (e.g., `pnpm typecheck`, `npx tsc --noEmit`, `yarn tsc --noEmit`).
 
-### 3. PR workflow notes (in the project CLAUDE.md)
+### 4. PR workflow notes (in the project CLAUDE.md)
 
 Do not generate a project `/pr` command or a project PR-review agent — PR creation is ordinary agent-led work gated by the global `panel-review` skill's `references/pr-readiness.md`, and reviews run through the global `/panel-review` skill, which auto-detects project traits. Instead, record in the generated project CLAUDE.md:
 
