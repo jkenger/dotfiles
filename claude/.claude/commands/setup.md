@@ -34,6 +34,7 @@ Set up this project for Claude Code using the global framework. Analyze the proj
 6. **Check for hexagonal architecture**: look for ports/, adapters/, domain/ directory structure
 7. **Check for 12-factor patterns**: look for Dockerfile, docker-compose.yml, Procfile, .env.example, process.env usage, PORT binding, Kubernetes manifests (k8s/, deployment.yaml)
 8. **Detect monorepo workspaces**: look for `workspaces` in package.json, `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, or multiple `apps/`/`packages/` directories. List each workspace found, with its own language/framework/test runner where it differs from the root.
+9. **Ask whether this project uses the global CLAUDE.md's feature lifecycle chain** (specification → design → plan → implement → verify → review → learn). If yes, scaffold the `docs/` structure below. If the project is small, a library, or already has its own docs convention, skip it.
 
 ## Generation Phase
 
@@ -97,7 +98,39 @@ Generate a PostToolUse hook for typecheck after Write/Edit on .ts/.tsx files:
 
 Use the actual typecheck command detected from the project (e.g., `pnpm typecheck`, `npx tsc --noEmit`, `yarn tsc --noEmit`).
 
-### 4. PR workflow notes (in the project CLAUDE.md)
+### 4. Docs structure (`docs/`)
+
+Only when step 9 of the Analysis Phase confirmed the project wants the feature
+lifecycle chain. Create, skipping any that already exist:
+
+```
+docs/
+├── product/
+│   ├── product-overview.md
+│   └── requirements/
+├── architecture/
+│   ├── system-overview.md
+│   ├── database-design.md
+│   └── decisions/
+├── specifications/
+│   └── .gitkeep
+└── development/
+    ├── coding-standards.md
+    └── testing-strategy.md
+```
+
+Seed each file with a title and one sentence on what goes there, not a template
+essay. `docs/specifications/` stays empty until the first feature; each feature
+then gets its own `docs/specifications/<feature>/` holding `specification.md`,
+`technical-design.md`, and `implementation-plan.md`.
+
+Add to the generated project CLAUDE.md so the chain's skills write here instead
+of their own fallbacks:
+- Story artifact home for `specification`: `docs/specifications/<feature>/specification.md`
+- Plan owner for `planning`/`/plan`: `docs/specifications/<feature>/implementation-plan.md` (overrides its `plans/` fallback)
+- Decision record home for `adr`: `docs/architecture/decisions/` (overrides its `docs/adr/` fallback)
+
+### 5. PR workflow notes (in the project CLAUDE.md)
 
 Do not generate a project `/pr` command or a project PR-review agent — PR creation is ordinary agent-led work gated by the global `panel-review` skill's `references/pr-readiness.md`, and reviews run through the global `/panel-review` skill, which auto-detects project traits. Instead, record in the generated project CLAUDE.md:
 
