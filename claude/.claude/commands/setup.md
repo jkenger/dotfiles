@@ -34,7 +34,8 @@ Set up this project for Claude Code using the global framework. Analyze the proj
 6. **Check for hexagonal architecture**: look for ports/, adapters/, domain/ directory structure
 7. **Check for 12-factor patterns**: look for Dockerfile, docker-compose.yml, Procfile, .env.example, process.env usage, PORT binding, Kubernetes manifests (k8s/, deployment.yaml)
 8. **Detect monorepo workspaces**: look for `workspaces` in package.json, `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, or multiple `apps/`/`packages/` directories. List each workspace found, with its own language/framework/test runner where it differs from the root.
-9. **Ask whether this project uses the global CLAUDE.md's feature lifecycle chain** (specification → design → plan → implement → verify → review → learn). If yes, scaffold the `docs/` structure below. If the project is small, a library, or already has its own docs convention, skip it.
+9. **Detect an existing `docs/` layout**: if `docs/` already exists, list its subfolders and whether each holds flat per-feature files (e.g. `docs/architecture/auth-sign-in.md`) or nested per-feature folders. Do not assume a blank slate — plenty of real projects have been writing docs for a while before `/setup` ever runs.
+10. **Ask whether this project uses the global CLAUDE.md's feature lifecycle chain** (specification → design → plan → implement → verify → review → learn). If the project is small, a library, or has no interest in the chain, skip it. Otherwise, scaffold or adapt the `docs/` structure below based on what step 9 found.
 
 ## Generation Phase
 
@@ -100,8 +101,11 @@ Use the actual typecheck command detected from the project (e.g., `pnpm typechec
 
 ### 4. Docs structure (`docs/`)
 
-Only when step 9 of the Analysis Phase confirmed the project wants the feature
-lifecycle chain. Create, skipping any that already exist:
+Only when step 10 of the Analysis Phase confirmed the project wants the feature
+lifecycle chain.
+
+**If step 9 found no existing `docs/` layout**, create this fresh, skipping any
+folder that already exists:
 
 ```
 docs/
@@ -124,11 +128,32 @@ essay. `docs/specifications/` stays empty until the first feature; each feature
 then gets its own `docs/specifications/<feature>/` holding `specification.md`,
 `technical-design.md`, and `implementation-plan.md`.
 
+**If step 9 found an existing `docs/` layout**, do not scaffold over it or
+force it into the nested `specifications/<feature>/` shape above. Present what
+was found and ask which fits:
+
+- **Adopt as-is**: change nothing on disk. Map the chain's roles onto the
+  existing folders (e.g. a project that already keeps flat per-feature files
+  directly under `docs/product/` and `docs/architecture/`, the way Ken OS
+  does, keeps doing that — `specification` and `codebase-design`/`adr` write
+  `docs/product/<feature>.md` and `docs/architecture/<feature>.md` directly,
+  no `specifications/` nesting).
+- **Add alongside**: keep every existing folder and file untouched, and add
+  only what's missing from the structure above (commonly `docs/development/`,
+  since most projects don't have one yet).
+- **Skip**: the project already has its own documentation practice and
+  doesn't want the chain's folders at all. Note this in the generated
+  `CLAUDE.md` so a later run of `/setup` doesn't ask again.
+
+Whichever applies, record the actual resolved paths in the generated project
+CLAUDE.md so the chain's skills write to where this project really keeps its
+docs, not to a convention it never adopted.
+
 Add to the generated project CLAUDE.md so the chain's skills write here instead
 of their own fallbacks:
-- Story artifact home for `specification`: `docs/specifications/<feature>/specification.md`
-- Plan owner for `planning`/`/plan`: `docs/specifications/<feature>/implementation-plan.md` (overrides its `plans/` fallback)
-- Decision record home for `adr`: `docs/architecture/decisions/` (overrides its `docs/adr/` fallback)
+- Story artifact home for `specification`: `docs/specifications/<feature>/specification.md`, or the resolved equivalent from the adopt/alongside choice above
+- Plan owner for `planning`/`/plan`: `docs/specifications/<feature>/implementation-plan.md` (overrides its `plans/` fallback), or the resolved equivalent
+- Decision record home for `adr`: `docs/architecture/decisions/` (overrides its `docs/adr/` fallback), or the resolved equivalent
 
 ### 5. PR workflow notes (in the project CLAUDE.md)
 
