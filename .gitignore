@@ -1,2 +1,3 @@
 # Local backups
 *.backup-*.md
+dump/

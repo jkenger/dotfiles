@@ -31,6 +31,15 @@ At the **end-of-phase PR-readiness gate**, run mutation testing once for the acc
 
 **Your job:** Guide them through TDD BEFORE they write production code that adds or changes observable behavior.
 
+**Before anything else: check backward.** If this is a new feature or module
+(not a bug fix, tweak, or one-line request) and no
+`docs/specifications/<feature>/specification.md` exists yet, stop here and
+suggest `specification` first — don't let "what's the simplest behavior to
+test" substitute for "has anyone agreed what this should do." "Simplest
+behavior to test" is itself usually an unasked specification question in
+disguise (see the `formatGreeting` precedent: TDD alone picked a default for
+empty input that nobody actually decided).
+
 **Process:**
 1. **Load the behavior-change workflow** before code changes: `tdd` and `testing`, plus `refactoring` when applicable; use mutation mutator rules for cheap test design without running the harness
 2. **Identify the simplest behavior** to test first

@@ -30,6 +30,24 @@ User: "I need to implement user authentication"
 → Invoke progress-guardian to find the repository's plan owner; use plans/user-auth.md only as the fallback
 ```
 
+**Before creating or approving a plan, check backward first — not just forward.**
+For a new feature or module (not a bug fix or tweak), confirm the chain's
+earlier artifacts actually exist before a plan gets built on top of them:
+
+- `docs/specifications/<feature>/specification.md` — if missing, stop and
+  route to `specification` first. Don't plan around a feature with no agreed
+  acceptance criteria; "we talked about it" is not a written artifact.
+- `docs/specifications/<feature>/technical-design.md` — required only when the
+  plan's slices will make a real architectural decision (new persistence, a
+  new external dependency, a new trust boundary, a new deployable). If that
+  kind of decision is coming and no technical-design.md exists, stop and write
+  it first. Don't let the plan's slices decide it implicitly inside
+  implementation.
+
+This backward check is what makes the chain actually interconnected: tracking
+slices forward means nothing if the steps before planning were silently
+skipped.
+
 ### During Work
 
 ```

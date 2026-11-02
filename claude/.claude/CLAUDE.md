@@ -14,6 +14,21 @@ Changing it needs a direct ask, not an assumption.
 - **UI:** React
 - **Language:** TypeScript, strict mode
 
+**Folder structure** — every project starts with the same four folders:
+
+```
+src/
+├── app/              # Next.js App Router: routes, layouts, route groups only
+├── design-system/    # reusable, product-agnostic UI primitives + tokens
+├── platform/         # named runtime capabilities (api-client, analytics, storage)
+└── generated/        # generated API clients/types, never hand-edited
+```
+
+Keep a route's own UI, data-fetching, and tests inside its `app/<route>/`
+folder. Add `features/<feature>/` only once an interaction is reused across
+more than one route — never scaffold it empty on day one. `platform/` holds
+named capabilities, never a generic `lib`/`utils` dump.
+
 ## Product
 
 @~/.claude/PRODUCT.md
@@ -96,9 +111,10 @@ Adapted from citypaul/.dotfiles on 12 Oct 2026. The skills it names live in
   passing tests instead of a fake failing one.
 - **Test behavior, not implementation.** Go through the public interface at the layer
   the claim is about. Coverage numbers are not proof.
-- **TypeScript strict.** No unexplained `any`, `unknown` at untrusted boundaries, no
-  type assertion without a reason. Validate with a schema at trust boundaries and
-  derive the type from it.
+- **TypeScript strict**, when the project's stack is TypeScript (per Hard
+  architecture above, or a project's own override). No unexplained `any`,
+  `unknown` at untrusted boundaries, no type assertion without a reason.
+  Validate with a schema at trust boundaries and derive the type from it.
 - **Prefer immutable data and pure functions.** Keep side effects at the edges and
   make them obvious.
 - **Small steps.** Every increment leaves the code working.
@@ -178,6 +194,19 @@ that opts into it.
    tracks every gate above and asks for commit approval.
 8. **Learn** — `learn` routes durable facts through `expectations`; `adr` for
    decisions; `docs-guardian` for maintained docs.
+
+**Chain integrity**: each step's artifact is a precondition for the next step,
+not a suggestion that enough conversation happened. Before implementation
+(step 5) starts for a new feature or module, confirm step 1's
+`specification.md` actually exists — don't let "we talked about it" substitute
+for a written artifact. Before implementing any decision that would change the
+system's shape (new persistence, a new external dependency, a new trust
+boundary, a new deployable), confirm step 3's `technical-design.md` captures it
+first; don't let the decision get made silently inside the code and
+rediscovered later. `progress-guardian` is the checkpoint that verifies this
+backward, not only forward: before approving a plan or starting implementation,
+it checks that the artifacts the earlier steps were supposed to produce
+actually exist, the same way it tracks slice progress going forward.
 
 ## How to write
 

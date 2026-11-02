@@ -2,7 +2,7 @@
 
 My Claude Code setup: my global CLAUDE.md, skills, agents, slash commands and hooks.
 
-Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles). [SOURCE.md](SOURCE.md) records the exact commit and what was left out.
+Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles). [SOURCE.md](SOURCE.md) records the exact commit and what was left out. [WORKFLOW.md](WORKFLOW.md) explains how I actually work with this day to day — the spec-first-then-TDD chain `CLAUDE.md` enforces, written for a human instead of the agent.
 
 ## What's here
 
@@ -15,9 +15,9 @@ Most of it comes from [citypaul/.dotfiles](https://github.com/citypaul/.dotfiles
 | `claude/.claude/how-to-write.md` | Voice and writing rules, linked from `CLAUDE.md` with `@~/.claude/how-to-write.md` |
 | `claude/.claude/CLAUDE.citypaul.md` | citypaul's development rules, unedited, reference only |
 | `scripts/claude-md.js` | Keeps the repo copies and the live `~/.claude` files in step |
-| `claude/.claude/skills/` | 50 skills: testing, refactoring, debugging, planning, API and architecture design, React, XState, writing |
+| `claude/.claude/skills/` | 50 skills: testing, refactoring, planning, API and architecture design, React, XState, writing |
 | `claude/.claude/agents/` | 9 agents, such as `tdd-guardian`, `ts-enforcer`, `refactor-scan`, `adr` |
-| `claude/.claude/commands/` | `/plan`, `/continue`, `/setup` |
+| `claude/.claude/commands/` | `/plan`, `/continue`, `/setup`, `/style` (switch the active output style) |
 | `claude/.claude/hooks/` | `prettier.js`, a format-on-edit hook, and `settings-snippet.json`, the entry that turns it on |
 | `claude/.claude/settings.json` | Reference only, not installed |
 
