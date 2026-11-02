@@ -171,6 +171,31 @@ Non-negotiables that keep the minimalism honest:
 - Declare support for both color schemes to the browser so form controls
   and scrollbars match the theme.
 
+## Setting this up fresh, via shadcn
+
+For a new project with no components yet, shadcn's own CLI already provides
+the variable architecture this file's tokens are meant to fill — don't build
+a parallel token system before it exists. This never happens at
+project-creation time; it happens whenever shadcn actually gets initialized
+for that project, which is itself a deliberate, context-dependent decision,
+not an automatic `/setup` step.
+
+1. Run shadcn's init (`npx shadcn@latest init`) first. It creates
+   `components.json`, `components/ui/`, the CSS-variable scaffold, and the
+   Tailwind setup.
+2. Swap shadcn's default CSS-variable values for the table under Color
+   above, in the same variable slots (`--background`, `--foreground`,
+   `--card`, `--border`, `--ring`, and so on) — values change, the
+   architecture doesn't.
+3. Add the four font roles via `next/font` (or the stack's equivalent),
+   replacing shadcn's default font.
+4. Align shadcn's default radius scale to the 16/12/8/6 ladder under
+   Components.
+5. Wire the three-way light/dark/system toggle, using `next-themes` if
+   shadcn's init didn't already scaffold one.
+6. Add the halftone accent (one or two places, never wallpaper) once a real
+   screen exists to need it.
+
 ## Applying this to an existing project
 
 When restyling something that already exists, keep its structure and stack,
