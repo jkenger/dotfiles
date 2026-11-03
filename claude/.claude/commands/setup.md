@@ -237,7 +237,7 @@ directory" option was taken. Create the other three baseline folders as
 ```
 <wherever app/ lives>/
 ├── app/                (already exists — never duplicated at the other location)
-├── design-system/
+├── components/ui/
 │   └── README.md        one line: primitives and tokens only, never a product import
 ├── platform/
 │   └── README.md         one line: named runtime capabilities, never a lib/utils dump
@@ -245,9 +245,20 @@ directory" option was taken. Create the other three baseline folders as
     └── .gitkeep
 ```
 
+`components/ui/` is the common location for this layer across the React
+ecosystem, with or without any particular library — don't invent a
+different name like `design-system/` on the theory that it sounds more
+deliberate. If this project does use shadcn, the name has a second reason:
+it's exactly shadcn's own default output path (`shadcn init`'s
+`aliases.ui`), so a different name would actively fight the tool the moment
+it's installed. If Analysis step 8 already found `components.json` (shadcn
+initialized), skip creating this folder's `README.md` entirely — shadcn
+already owns the real folder; adding a placeholder on top of it just
+recreates the same split-brain this baseline exists to avoid.
+
 Do not create `features/` — it is earned the first time an interaction is
 reused across more than one route, never scaffolded empty on day one. Seed
-`design-system/README.md` and `platform/README.md` with the one-line rule
+`components/ui/README.md` and `platform/README.md` with the one-line rule
 each folder exists to enforce, not an empty placeholder.
 
 Skip this step entirely for the **monorepo** or **microservices** topology

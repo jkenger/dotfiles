@@ -19,7 +19,7 @@ Changing it needs a direct ask, not an assumption.
 ```
 src/
 ├── app/              # Next.js App Router: routes, layouts, route groups only
-├── design-system/    # reusable, product-agnostic UI primitives + tokens
+├── components/ui/    # presentational-only primitives + tokens — the common location for this layer across the React ecosystem; also matches shadcn's own default output path, if/when a project uses it
 ├── platform/         # named runtime capabilities (api-client, analytics, storage)
 └── generated/        # generated API clients/types, never hand-edited
 ```
@@ -28,6 +28,15 @@ Keep a route's own UI, data-fetching, and tests inside its `app/<route>/`
 folder. Add `features/<feature>/` only once an interaction is reused across
 more than one route — never scaffold it empty on day one. `platform/` holds
 named capabilities, never a generic `lib`/`utils` dump.
+
+`ui/` means presentational only — no business logic, no data fetching, even
+when its shape looks app-specific (a chat bubble styled for this one app is
+still `ui/` if it has no logic in it). `components/` directly, not under
+`ui/`, is a judgment call rather than a folder `/setup` ever scaffolds: reach
+for it only when a file genuinely spans more than one route or feature right
+now, with evidence, or belongs to the app's own shell (a root header, a theme
+provider) — never for "might get reused someday." If nothing currently needs
+it, don't create it.
 
 ## Product
 
@@ -181,31 +190,42 @@ that opts into it.
    contract; `adr` for any decision with real alternatives. Writes to
    `docs/specifications/<feature>/technical-design.md` and
    `docs/architecture/decisions/`.
-4. **Plan the slices** — `/plan` (`planning`). Writes to
+4. **Mockups, only for a feature with a real visual surface** — draw the
+   chosen frames and states using the host's canvas/artifact capability, with
+   a brief alongside them saying which frames, states, and words to draw.
+   Writes to `docs/specifications/<feature>/mockups/brief.md` and
+   `docs/specifications/<feature>/mockups/canvas/`. Needs step 1's acceptance
+   criteria and step 3's state decisions settled first — you can't draw states
+   that haven't been decided yet. Code follows the chosen mockups, never the
+   other way around; skip this step entirely for a feature with no screen
+   (a pure function, a CLI, a background job).
+5. **Plan the slices** — `/plan` (`planning`). Writes to
    `docs/specifications/<feature>/implementation-plan.md`. Test design isn't a
    separate stage: each slice's failing test comes immediately before its code,
    inside the RED-GREEN-REFACTOR cycle `planning` already runs.
-5. **Implement** — `mattpocock-skills:tdd`, `testing`, `functional`,
+6. **Implement** — `mattpocock-skills:tdd`, `testing`, `functional`,
    `typescript-strict`, one slice at a time.
-6. **Verify** — `tdd-guardian` for process, `mutation-testing` at end of phase,
+7. **Verify** — `tdd-guardian` for process, `mutation-testing` at end of phase,
    `ts-enforcer` for types.
-7. **Review and deliver** — `panel-review` or `double-check`;
+8. **Review and deliver** — `panel-review` or `double-check`;
    `stack-pull-requests` if a slice needs review layers. `progress-guardian`
    tracks every gate above and asks for commit approval.
-8. **Learn** — `learn` routes durable facts through `expectations`; `adr` for
+9. **Learn** — `learn` routes durable facts through `expectations`; `adr` for
    decisions; `docs-guardian` for maintained docs.
 
 **Chain integrity**: each step's artifact is a precondition for the next step,
 not a suggestion that enough conversation happened. Before implementation
-(step 5) starts for a new feature or module, confirm step 1's
+(step 6) starts for a new feature or module, confirm step 1's
 `specification.md` actually exists — don't let "we talked about it" substitute
 for a written artifact. Before implementing any decision that would change the
 system's shape (new persistence, a new external dependency, a new trust
 boundary, a new deployable), confirm step 3's `technical-design.md` captures it
 first; don't let the decision get made silently inside the code and
-rediscovered later. `progress-guardian` is the checkpoint that verifies this
-backward, not only forward: before approving a plan or starting implementation,
-it checks that the artifacts the earlier steps were supposed to produce
+rediscovered later. For a feature with a real screen, confirm step 4's mockup
+brief exists before implementation starts too — don't let code decide what a
+screen looks like when nobody drew it first. `progress-guardian` is the
+checkpoint that verifies this backward, not only forward: before approving a
+plan or starting implementation, it checks that the artifacts the earlier steps were supposed to produce
 actually exist, the same way it tracks slice progress going forward.
 
 ## How to write
